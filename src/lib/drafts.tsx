@@ -13,6 +13,7 @@ export type Draft = {
   title_override?: string | null;
   description_override?: string | null;
   tags_override?: string | null;
+  music_credit?: string | null;
   posted_at?: string | null;
 };
 

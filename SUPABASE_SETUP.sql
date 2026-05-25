@@ -7,9 +7,14 @@ create table if not exists public.drafts (
   title_override       text,
   description_override text,
   tags_override        text,
+  music_credit         text,
   posted_at            timestamptz,
   updated_at           timestamptz not null default now()
 );
+
+-- For existing tables: add the column if it's missing.
+alter table public.drafts
+  add column if not exists music_credit text;
 
 -- Auto-bump updated_at on every change.
 create or replace function public.set_updated_at()

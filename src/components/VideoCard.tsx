@@ -8,6 +8,7 @@ export const VideoCard: React.FC<{ video: Video }> = ({ video }) => {
   const title = draft.title_override ?? video.title;
   const description = draft.description_override ?? video.description;
   const tags = draft.tags_override ?? video.tags;
+  const musicCredit = draft.music_credit ?? "";
   const posted = !!draft.posted_at;
 
   const togglePosted = () => {
@@ -71,6 +72,14 @@ export const VideoCard: React.FC<{ video: Video }> = ({ video }) => {
           onChange={(v) =>
             update({ tags_override: v === video.tags ? null : v })
           }
+          multiline
+        />
+        <CopyableField
+          label="Music Credit"
+          icon="🎵"
+          value={musicCredit}
+          originalValue=""
+          onChange={(v) => update({ music_credit: v.trim() === "" ? null : v })}
           multiline
         />
       </div>
