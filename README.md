@@ -3,6 +3,26 @@
 Simple web viewer for `out/youtube-upload-details.txt` so I can copy title /
 description / tags one at a time from my phone during YouTube upload.
 
+Edits (title/description/tags overrides + "posted" toggle) sync across
+devices via Supabase.
+
+## First-time setup (Supabase)
+
+1. Create a free Supabase project at https://supabase.com
+2. Open **SQL Editor** → paste the contents of `SUPABASE_SETUP.sql` → Run
+3. Open **Project Settings → API** → copy the **URL** and **anon public** key
+4. Save them locally:
+   ```bash
+   cp .env.example .env.local
+   # edit .env.local — paste the two values
+   ```
+5. On Netlify (Site → Settings → Environment variables), add:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+6. Trigger a Netlify deploy so the env vars get baked into the build.
+
+Missing env vars? The site falls back to localStorage-only mode (no sync).
+
 ## Local dev
 
 ```bash

@@ -3,12 +3,15 @@ import videosData from "./data/videos.json";
 import type { Video } from "./types";
 import { PasswordGate } from "./components/PasswordGate";
 import { VideoCard } from "./components/VideoCard";
+import { DraftsProvider, useDrafts } from "./lib/drafts";
 
 const videos = videosData as Video[];
 
 export const App: React.FC = () => (
   <PasswordGate>
-    <Home />
+    <DraftsProvider>
+      <Home />
+    </DraftsProvider>
   </PasswordGate>
 );
 
@@ -16,6 +19,7 @@ const Home: React.FC = () => {
   const [query, setQuery] = useState("");
   const [enemy, setEnemy] = useState<string>("all");
   const [hidePosted, setHidePosted] = useState(false);
+  const { drafts } = useDrafts();
 
   const enemies = useMemo(() => {
     const set = new Set<string>();
@@ -27,8 +31,7 @@ const Home: React.FC = () => {
     const q = query.trim().toLowerCase();
     return videos.filter((v) => {
       if (enemy !== "all" && v.enemy !== enemy) return false;
-      if (hidePosted && localStorage.getItem(`yt-site:posted:${v.id}`) === "1")
-        return false;
+      if (hidePosted && drafts[v.id]?.posted_at) return false;
       if (!q) return true;
       return (
         v.title.toLowerCase().includes(q) ||
@@ -37,7 +40,7 @@ const Home: React.FC = () => {
         v.filename.toLowerCase().includes(q)
       );
     });
-  }, [query, enemy, hidePosted]);
+  }, [query, enemy, hidePosted, drafts]);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6 pb-24">
@@ -92,7 +95,7 @@ const Home: React.FC = () => {
       )}
 
       <footer className="pt-10 text-center text-xs text-white/30">
-        edits saved in your browser only · rebuild + redeploy to refresh
+        edits sync across devices via Supabase · rebuild + redeploy to refresh
         draft source
       </footer>
     </div>

@@ -1,54 +1,17 @@
-import { useEffect, useState } from "react";
 import type { Video } from "../types";
 import { CopyableField } from "./CopyableField";
-
-const STORAGE_PREFIX = "yt-site:edit:";
-const POSTED_PREFIX = "yt-site:posted:";
-
-const loadEdit = (id: string): Partial<Video> => {
-  try {
-    const raw = localStorage.getItem(STORAGE_PREFIX + id);
-    if (!raw) return {};
-    return JSON.parse(raw);
-  } catch {
-    return {};
-  }
-};
-
-const saveEdit = (id: string, edits: Partial<Video>) => {
-  if (
-    !edits.title &&
-    !edits.description &&
-    !edits.tags
-  ) {
-    localStorage.removeItem(STORAGE_PREFIX + id);
-    return;
-  }
-  localStorage.setItem(STORAGE_PREFIX + id, JSON.stringify(edits));
-};
+import { useDraftFor } from "../lib/drafts";
 
 export const VideoCard: React.FC<{ video: Video }> = ({ video }) => {
-  const [edits, setEdits] = useState<Partial<Video>>(() => loadEdit(video.id));
-  const [posted, setPosted] = useState(
-    () => localStorage.getItem(POSTED_PREFIX + video.id) === "1",
-  );
+  const { draft, update } = useDraftFor(video.id);
 
-  const title = edits.title ?? video.title;
-  const description = edits.description ?? video.description;
-  const tags = edits.tags ?? video.tags;
-
-  useEffect(() => {
-    saveEdit(video.id, edits);
-  }, [edits, video.id]);
+  const title = draft.title_override ?? video.title;
+  const description = draft.description_override ?? video.description;
+  const tags = draft.tags_override ?? video.tags;
+  const posted = !!draft.posted_at;
 
   const togglePosted = () => {
-    const next = !posted;
-    setPosted(next);
-    if (next) {
-      localStorage.setItem(POSTED_PREFIX + video.id, "1");
-    } else {
-      localStorage.removeItem(POSTED_PREFIX + video.id);
-    }
+    update({ posted_at: posted ? null : new Date().toISOString() });
   };
 
   return (
@@ -86,14 +49,18 @@ export const VideoCard: React.FC<{ video: Video }> = ({ video }) => {
           icon="📌"
           value={title}
           originalValue={video.title}
-          onChange={(v) => setEdits({ ...edits, title: v })}
+          onChange={(v) =>
+            update({ title_override: v === video.title ? null : v })
+          }
         />
         <CopyableField
           label="Description"
           icon="📝"
           value={description}
           originalValue={video.description}
-          onChange={(v) => setEdits({ ...edits, description: v })}
+          onChange={(v) =>
+            update({ description_override: v === video.description ? null : v })
+          }
           multiline
         />
         <CopyableField
@@ -101,7 +68,9 @@ export const VideoCard: React.FC<{ video: Video }> = ({ video }) => {
           icon="🏷️"
           value={tags}
           originalValue={video.tags}
-          onChange={(v) => setEdits({ ...edits, tags: v })}
+          onChange={(v) =>
+            update({ tags_override: v === video.tags ? null : v })
+          }
           multiline
         />
       </div>
